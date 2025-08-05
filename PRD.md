@@ -10,13 +10,13 @@ Setting up Microsoft 365 security and management for macOS POCs is time-intensiv
 
 ## Solution
 
-A tool with checkbox UI for selecting and auto-deploying pre-configured policies across Intune, Entra, Purview, and Defender.
+A tool with checkbox UI for selecting and auto-deploying pre-configured policies across Intune, Entra, Purview, and Defender. The primary goal is to create an environment that achieves a clean report from the Mac Evaluation Utility, demonstrating comprehensive macOS security and management coverage.
 
 ## Target Users
 
-- IT Administrators setting up POCs
-- Solution Architects demonstrating capabilities  
-- Microsoft Partners deploying client solutions
+- IT Administrators setting up POCs with clean Mac Evaluation Utility reports
+- Solution Architects demonstrating comprehensive macOS security capabilities  
+- Microsoft Partners deploying client solutions that pass evaluation standards
 
 ## Core Features
 
@@ -36,6 +36,7 @@ A tool with checkbox UI for selecting and auto-deploying pre-configured policies
 - Dependency-aware deployment order
 - Real-time progress and error handling
 - Deployment reporting
+- Mac Evaluation Utility compliance validation
 
 ## User Flow
 
