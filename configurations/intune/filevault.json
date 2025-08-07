@@ -1,9 +1,7 @@
 ﻿{
     "@odata.context": "https://graph.microsoft.com/beta/$metadata#deviceManagement/configurationPolicies/$entity",
-    "createdDateTime": "2023-07-21T14:38:22.7366306Z",
     "creationSource": null,
-    "description": "",
-    "lastModifiedDateTime": "2024-05-17T15:48:45.3147782Z",
+    "description": "Configures FileVault disk encryption on macOS devices during Setup Assistant with recovery key escrow to Microsoft Endpoint Manager for enterprise data protection.",
     "name": "Enable FileVault in Setup Assistant",
     "platforms": "macOS",
     "priorityMetaData": null,
@@ -12,7 +10,6 @@
     ],
     "settingCount": 3,
     "technologies": "mdm,appleRemoteManagement",
-    "id": "71ac189d-745e-41d8-959e-54f7d53fe8ff",
     "templateReference": {
         "templateId": "",
         "templateFamily": "none",

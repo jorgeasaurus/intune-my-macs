@@ -1,9 +1,7 @@
 ﻿{
     "@odata.context": "https://graph.microsoft.com/beta/$metadata#deviceManagement/configurationPolicies/$entity",
-    "createdDateTime": "2024-06-05T17:15:34.7899717Z",
     "creationSource": null,
-    "description": "",
-    "lastModifiedDateTime": "2024-06-05T17:15:34.7899717Z",
+    "description": "Enforces passcode requirements for macOS devices including minimum length, complexity, failed attempt limits, and expiration policies to ensure device security compliance.",
     "name": "Passcode Policy (DDM)",
     "platforms": "macOS",
     "priorityMetaData": null,
@@ -12,7 +10,6 @@
     ],
     "settingCount": 1,
     "technologies": "mdm,appleRemoteManagement",
-    "id": "9dc3b18a-0f78-4de1-b821-d587b5d63f1f",
     "templateReference": {
         "templateId": "",
         "templateFamily": "none",

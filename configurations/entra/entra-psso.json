@@ -1,9 +1,7 @@
 ﻿{
     "@odata.context": "https://graph.microsoft.com/beta/$metadata#deviceManagement/configurationPolicies/$entity",
-    "createdDateTime": "2023-06-19T13:23:50.1256689Z",
     "creationSource": null,
-    "description": "",
-    "lastModifiedDateTime": "2025-06-26T09:16:25.3630695Z",
+    "description": "Configures Platform Single Sign-On (SSO) for Microsoft Entra ID authentication on macOS devices, enabling seamless authentication across Microsoft services and applications.",
     "name": "Platform SSO",
     "platforms": "macOS",
     "priorityMetaData": null,
@@ -12,7 +10,6 @@
     ],
     "settingCount": 1,
     "technologies": "mdm,appleRemoteManagement",
-    "id": "516a3164-e3e9-4a25-93a7-51524eae39e0",
     "templateReference": {
         "templateId": "",
         "templateFamily": "none",
