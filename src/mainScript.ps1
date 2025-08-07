@@ -1,11 +1,13 @@
 
-$manifestUrl = "https://raw.githubusercontent.com/microsoft/intune-my-macs/d5032d75e28614ff2d99dfea62115da3764a5fa4/manifest.xml?token=GHSAT0AAAAAADGFKNLDBFKKBN5XQ75FYGBY2EVENXA"
+$manifestUrl = "https://raw.githubusercontent.com/microsoft/intune-my-macs/refs/heads/main/manifest.json?token=GHSAT0AAAAAADGFKNLD3FSIMUE5TVBOWIRS2EVFJRA"
 
-$xmlManifest = (Invoke-WebRequest -Uri $manifestUrl -Method GET)
-$xmlManifest #| ConvertTo-Json -Depth 10
+$jsonManifest = (Invoke-WebRequest -Uri $manifestUrl -Method GET)
+#$jsonManifest = $jsonManifest.Content 
 
-foreach ($item in $xmlManifest.manifest) {
-    # Process each item in the manifest
-    $item | ConvertTo-Json -Depth 10
-    Write-Output $item
-}   
+# convert json to object
+$objManifest = $jsonManifest | ConvertFrom-Json
+
+foreach ($item in $objManifest.manifest.policies.policy) {
+    # Process each policy in the manifest
+    $item.name
+}
