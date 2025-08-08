@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "title": "Intune macOS Configuration Policies",
+    "title": "Intune macOS Policies, Packages, and Scripts",
     "description": "Collection of Microsoft Intune configuration policies for macOS device management, plus install scripts for Company Portal, Microsoft 365 Apps, Microsoft Edge, and Windows App.",
     "version": "1.0",
     "lastUpdated": "2025-08-08"
@@ -48,6 +48,45 @@
       "platform": "macOS",
       "category": "Config",
       "filePath": "scripts/intune/install-company-portal.zsh",
+      "requiresElevation": true,
+      "runAsSignedInUser": false,
+      "hideNotifications": true,
+      "frequency": "",
+      "maxRetries": 3
+    },
+    {
+      "type": "Script",
+      "name": "IMM - Device Rename",
+      "description": "Renames the Mac based on country code and serial number; sets ComputerName, HostName, and LocalHostName with logging.",
+      "platform": "macOS",
+      "category": "Config",
+      "filePath": "scripts/intune/device-rename.sh",
+      "requiresElevation": true,
+      "runAsSignedInUser": false,
+      "hideNotifications": true,
+      "frequency": "",
+      "maxRetries": 3
+    },
+    {
+      "type": "Script",
+      "name": "IMM - Configure Dock",
+      "description": "Waits for app installs then configures the macOS Dock items; supports swiftDialog status updates and optional dockutil.",
+      "platform": "macOS",
+      "category": "Config",
+      "filePath": "scripts/intune/configure-dock.sh",
+      "requiresElevation": true,
+      "runAsSignedInUser": false,
+      "hideNotifications": true,
+      "frequency": "",
+      "maxRetries": 3
+    },
+    {
+      "type": "Script",
+      "name": "IMM - Install Escrow Buddy",
+      "description": "Downloads and installs the latest Escrow Buddy; checks FileVault status and authorization, and remediates missing escrow where needed.",
+      "platform": "macOS",
+      "category": "Security",
+      "filePath": "scripts/intune/install-escrow-buddy.sh",
       "requiresElevation": true,
       "runAsSignedInUser": false,
       "hideNotifications": true,
