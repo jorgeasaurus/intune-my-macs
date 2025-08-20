@@ -15,9 +15,9 @@ https://learn.microsoft.com/powershell/microsoftgraph/app-only?view=graph-powers
 #>
 
 # Choose what to run
-$importPolicies = $true
-$importPackages = $true
-$importScripts = $true
+$importPolicies = $false
+$importPackages = $false
+$importScripts = $false
 
 # set policy prefix
 $policyPrefix = "[CK-import] "
@@ -28,6 +28,7 @@ Connect-MgGraph -Scopes "DeviceManagementConfiguration.ReadWrite.All" -NoWelcome
 # Resolve repo root (script is in src/, manifest is at repo root)
 $repoRoot = $PSScriptRoot
 if (-not $repoRoot) { $repoRoot = Split-Path -Parent $MyInvocation.MyCommand.Path -ErrorAction Continue}
+$repoRoot = Split-Path -Parent $repoRoot
 if (-not $repoRoot) { $repoRoot = "C:\temp\intune-my-macs"}
 
 # set manifest path
