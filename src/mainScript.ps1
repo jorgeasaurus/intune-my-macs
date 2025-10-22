@@ -1164,7 +1164,7 @@ if ($importPackages) {
         Write-Host "  - Category: $($a.category); Platform: $($a.platform)"
         Write-Host "  - Path: $($a.filePath) [$status]"
         if ($desc) { Write-Host "  - Desc: $desc" }
-        Write-Host "  - preinstallscript: $($a.preinstallscript)"
+        Write-Host "  - preInstallScript: $($a.preInstallScript)"
         Write-Host "  - postInstallScript: $($a.postInstallScript)"
         Write-Host "  - primaryBundleId: $($a.primaryBundleId)"
         Write-Host "  - primaryBundleVersion: $($a.primaryBundleVersion)"
@@ -1196,13 +1196,13 @@ if ($importPackages) {
         )
 
         # add preinstall script if needed
-        if ($a.preinstallscript) {
-            $preinstallScript = Join-Path $repoRoot $a.preinstallscript
+        if ($a.preInstallScript) {
+            $preinstallScript = Join-Path $repoRoot $a.preInstallScript
             if (-not (Test-Path -LiteralPath $preinstallScript)) {
-                Write-Warning "Pre-install script path not found: $($a.preinstallscript) (resolved: $preinstallScript). Will skip embedding."
+                Write-Warning "Pre-install script path not found: $($a.preInstallScript) (resolved: $preinstallScript). Will skip embedding."
                 $preinstallScript = $null
             } else {
-                Write-Host "  - Using pre-install script: $($a.preinstallscript)" -ForegroundColor DarkCyan
+                Write-Host "  - Using pre-install script: $($a.preInstallScript)" -ForegroundColor DarkCyan
             }
         } else {
             $preinstallScript = $null

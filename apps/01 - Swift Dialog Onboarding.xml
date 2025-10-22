@@ -12,7 +12,6 @@
     <MinimumSupportedOperatingSystem>v13_0</MinimumSupportedOperatingSystem>
     <IgnoreVersionDetection>true</IgnoreVersionDetection>
   <PreInstallScript>apps/01 - Swift Dialog Onboarding_pre.sh</PreInstallScript>
-  <!-- Optional lifecycle scripts (relative paths). Only included if file exists -->
   <PostInstallScript>apps/01 - Swift Dialog Onboarding_post.sh</PostInstallScript>
   </Package>
 </MacIntuneManifest>
