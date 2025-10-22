@@ -16,12 +16,13 @@ https://learn.microsoft.com/powershell/microsoftgraph/app-only?view=graph-powers
 #>
 
 # Choose what to run
-$importPolicies     = $true
-$importPackages     = $true
-$importScripts      = $true
-$importCompliance   = $true  # new: compliance policies
-$importCustomAttrs  = $true  # new: custom attributes
-$includeMde         = $false # include mde/ folder content only if --mde specified
+$importPolicies             = $true
+$importPackages             = $true
+$importScripts              = $true
+$importCompliance           = $true  # new: compliance policies
+$importCustomAttrs          = $true  # new: custom attributes
+$includeMde                 = $false # include mde/ folder content only if --mde specified
+$includeSecurityBaseline    = $false # include Security Baseline folder content only if --security-baseline specified
 
 # Initialize created object trackers per run
 $createdPolicyIds = @()
@@ -236,6 +237,7 @@ if ($argsLower.Count -gt 0) {
     if ($argsLower -contains '--show-all-scripts') { $showAllScripts = $true }
     if ($argsLower -contains '--remove-all') { $removeAll = $true }
     if ($argsLower -contains '--mde' -or $argsLower -contains '-mde') { $includeMde = $true }
+    if ($argsLower -contains '--security-baseline' -or $argsLower -contains '-security-baseline') { $includeSecurityBaseline = $true }
     # Support custom prefix via --prefix="Value "
     foreach ($arg in $args) {
         if ($arg -like '--prefix=*') {
@@ -487,6 +489,15 @@ if (-not $includeMde) {
     if ($removed -gt 0) { Write-Host "Excluded $removed mde/ manifest(s) (use --mde to include)." -ForegroundColor DarkGray }
 } else {
     Write-Host "Including mde/ manifests (--mde specified)." -ForegroundColor DarkGray
+}
+
+if (-not $includeSecurityBaseline) {
+    $pre = $distributedItems.Count
+    $distributedItems = $distributedItems | Where-Object { $_.filePath -notmatch '(^|/)security-baseline/' }
+    $removed = $pre - $distributedItems.Count
+    if ($removed -gt 0) { Write-Host "Excluded $removed security-baseline/ manifest(s) (use --security-baseline to include)." -ForegroundColor DarkGray }
+} else {
+    Write-Host "Including security-baseline/ manifests (--security-baseline specified)." -ForegroundColor DarkGray
 }
 
 if ($distributedItems.type -contains '' -or $distributedItems.type -contains $null) { Write-Error "One or more XML manifests invalid (missing Type)."; exit 1 }
