@@ -35,8 +35,8 @@ $createdCustomAttrIds = @()  # custom attributes
 # set policy prefix
 $policyPrefix = "[intune-my-macs] "
 
-# connect to Graph (add apps scope + groups for assignments + scripts for shell scripts)
-Connect-MgGraph -Scopes "DeviceManagementConfiguration.ReadWrite.All,DeviceManagementApps.ReadWrite.All,DeviceManagementScripts.ReadWrite.All,Group.Read.All" -NoWelcome
+# tenant ID (optional, can be specified via --tenant-id)
+$tenantId = $null
 
 # Resolve repo root (script is now in repository root)
 $repoRoot = $PSScriptRoot
@@ -49,6 +49,7 @@ if (-not $repoRoot) { Write-Error "Failed to resolve repository root; aborting."
 #   --prefix=VALUE          : Name prefix for all created objects
 #   --remove-all            : Delete existing prefixed policies/scripts/apps
 #   --assign-group="Name"   : Assign newly created objects to specified Entra group (required intent for apps)
+#   --tenant-id=GUID        : Specify tenant ID for Microsoft Graph connection
 #   --apps / --config / --scripts : Scope the import to specific object types
 
 
@@ -245,6 +246,7 @@ if ($argsLower -contains '-h' -or $argsLower -contains '--help') {
     Write-Host "MODIFICATION OPTIONS:" -ForegroundColor Yellow
     Write-Host "  --prefix=`"VALUE`"      Set custom prefix for all created objects (default: '[intune-my-macs] ')"
     Write-Host "  --assign-group=`"NAME`" Assign newly created objects to specified Entra group"
+    Write-Host "  --tenant-id=`"GUID`"    Specify tenant ID for Microsoft Graph connection"
     Write-Host "  --remove-all          Delete all existing Intune objects with the configured prefix`n"
     Write-Host "HELP:" -ForegroundColor Yellow
     Write-Host "  -h, --help            Display this help message`n"
@@ -257,6 +259,8 @@ if ($argsLower -contains '-h' -or $argsLower -contains '--help') {
     Write-Host "  ./mainScript.ps1 --config --prefix=`"[Production] `"`n"
     Write-Host "  # Include security baseline profiles"
     Write-Host "  ./mainScript.ps1 --config --security-baseline`n"
+    Write-Host "  # Connect to a specific tenant"
+    Write-Host "  ./mainScript.ps1 --tenant-id=`"12345678-1234-1234-1234-123456789012`"`n"
     Write-Host "  # Remove all objects with the default prefix"
     Write-Host "  ./mainScript.ps1 --remove-all`n"
     Write-Host "NOTE:" -ForegroundColor Yellow
@@ -286,6 +290,9 @@ if ($argsLower.Count -gt 0) {
         if ($arg -like '--assign-group=*') {
             $assignGroupName = $arg.Substring(15).Trim('"')
         }
+        if ($arg -like '--tenant-id=*') {
+            $tenantId = $arg.Substring(12).Trim('"')
+        }
     }
     if (-not ($importPolicies -or $importPackages -or $importScripts -or $importCompliance -or $importCustomAttrs)) {
     Write-Warning "No valid selector provided (--apps, --config, --scripts, --custom-attributes). Defaulting to all."
@@ -295,6 +302,17 @@ if ($argsLower.Count -gt 0) {
         Write-Host ("Selection: configPolicies={0} compliance={1} packages={2} scripts={3} customAttributes={4} showAllScripts={5} includeMde={6}" -f $importPolicies, $importCompliance, $importPackages, $importScripts, $importCustomAttrs, $showAllScripts, $includeMde) -ForegroundColor Cyan
     }
 }
+
+# Connect to Microsoft Graph (add apps scope + groups for assignments + scripts for shell scripts)
+$graphParams = @{
+    Scopes = "DeviceManagementConfiguration.ReadWrite.All,DeviceManagementApps.ReadWrite.All,DeviceManagementScripts.ReadWrite.All,Group.Read.All"
+    NoWelcome = $true
+}
+if ($tenantId) {
+    $graphParams['TenantId'] = $tenantId
+    Write-Host "Connecting to Microsoft Graph with tenant ID: $tenantId" -ForegroundColor Cyan
+}
+Connect-MgGraph @graphParams
 
 function Remove-IntunePrefixedContent {
     param(
