@@ -54,7 +54,12 @@ pwsh ./mainScript.ps1
 
 **Deploy and assign to a group:**
 ```bash
-pwsh ./mainScript.ps1 --assign-group "Pilot Macs"
+pwsh ./mainScript.ps1 --assign-group="Intune Mac Pilot"
+```
+
+**Deploy with MDE and assign to a group:**
+```bash
+pwsh ./mainScript.ps1 --assign-group="Intune Mac Pilot" --mde
 ```
 
 The script will:
