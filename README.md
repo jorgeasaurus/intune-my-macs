@@ -29,9 +29,8 @@ winget install Microsoft.PowerShell
 ```bash
 git clone https://github.com/microsoft/intune-my-macs.git
 cd intune-my-macs
-pwsh ./mainScript.ps1 --assign-group="Intune Mac Pilot"
+pwsh ./mainScript.ps1 --assign-group "Intune Mac Pilot"
 ```
-Use `--mde`, `--security-baseline`, or `--remove-all` as needed.
 
 ### 4. Common flags
 | Flag | Purpose |
@@ -40,7 +39,6 @@ Use `--mde`, `--security-baseline`, or `--remove-all` as needed.
 | `--assign-group "Name"` | Assign every created object to an Entra group |
 | `--prefix "[custom] "` | Override the default naming prefix |
 | `--mde` | Include the `mde/` content (requires onboarding file) |
-| `--security-baseline` | Include security baseline manifests |
 | `--remove-all` | Delete previously created objects that use the current prefix |
 
 ---
@@ -57,18 +55,15 @@ For the full artifact catalog and settings, see `INTUNE-MY-MACS-DOCUMENTATION.md
 ---
 
 ## Learn more
-- `INTUNE-MY-MACS-DOCUMENTATION.md` – narrative overview of every artifact.
-- `mde/README.md` – Defender prerequisites and onboarding steps.
-- `tools/README.md` – Utilities such as documentation export, duplicate payload detection, and processing-order reports.
-- `REFERENCE-INDEX.md` – Source manifest index with paths and status.
-- `scripts/intune/` & `apps/` – Each folder contains local README notes where relevant.
+- [`INTUNE-MY-MACS-DOCUMENTATION.md`](INTUNE-MY-MACS-DOCUMENTATION.md) – overview of every artifact.
+- [`mde/README.md`](mde/README.md) – Defender prerequisites and onboarding steps.
+- [`tools/README.md`](tools/README.md) – Utilities such as documentation export, duplicate payload detection, and processing-order reports.
 
 ---
 
 ## Troubleshooting at a glance
 - **Auth or permission errors:** Re-run `pwsh ./mainScript.ps1` after confirming the Graph permissions above; modules auto-install per user.
 - **Devices not receiving policies:** Verify APNS, device enrollment, and group membership, then force a device sync.
-- **Large PKG issues:** Use Git LFS for custom packages or remove oversized files before committing.
 
 ---
 
