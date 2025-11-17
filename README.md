@@ -29,11 +29,16 @@ winget install Microsoft.PowerShell
 ### 3. Clone and run
 ```bash
 git clone https://github.com/microsoft/intune-my-macs.git
-cd intune-my-macs
+```
 # Preview (dry-run)
+```
+cd intune-my-macs
 pwsh ./mainScript.ps1 --assign-group "Intune Mac Pilot"
+```
 
-# Push changes
+# Apply config
+```
+cd intune-my-macs
 pwsh ./mainScript.ps1 --assign-group "Intune Mac Pilot" --apply
 ```
 
