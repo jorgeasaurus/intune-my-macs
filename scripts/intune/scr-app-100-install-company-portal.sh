@@ -83,14 +83,14 @@ updateMAU () {
     echo "$(date) | Starting downlading of [MAU]"
 
     cd "$tempdir"
-    curl -o "$tempdir/mau.pkg" -f -s --connect-timeout 30 --retry 5 --retry-delay 60 -L -J -O "$mauurl"
+    curl -o "$tempdir/mau.pkg" --connect-timeout 30 --retry 5 --retry-delay 60 -L "$mauurl"
     curlExitCode=$?
     
     # Retry once if curl failed
     if [[ $curlExitCode != 0 ]]; then
         echo "$(date) | First download attempt failed with exit code [$curlExitCode], retrying once more..."
         sleep 5
-        curl -o "$tempdir/mau.pkg" -f -s --connect-timeout 30 --retry 5 --retry-delay 60 -L -J -O "$mauurl"
+        curl -o "$tempdir/mau.pkg" --connect-timeout 30 --retry 5 --retry-delay 60 -L "$mauurl"
         curlExitCode=$?
     fi
     
@@ -203,22 +203,20 @@ downloadApp () {
     echo "$(date) | Downloading $appname [$weburl]"
 
     cd "$tempdir"
-    curl -f -s --connect-timeout 30 --retry 5 --retry-delay 60 --compressed -L -J -O "$weburl"
+    curl -o "CompanyPortal-Installer.pkg" --connect-timeout 30 --retry 5 --retry-delay 60 -L "$weburl"
     curlExitCode=$?
     
     # Retry once if curl failed
     if [[ $curlExitCode != 0 ]]; then
         echo "$(date) | First download attempt failed with exit code [$curlExitCode], retrying once more..."
         sleep 5
-        curl -f -s --connect-timeout 30 --retry 5 --retry-delay 60 --compressed -L -J -O "$weburl"
+        curl -o "CompanyPortal-Installer.pkg" --connect-timeout 30 --retry 5 --retry-delay 60 -L "$weburl"
         curlExitCode=$?
     fi
     
     if [[ $curlExitCode == 0 ]]; then
-        for f in *; do
-            tempfile=$f
-            echo "$(date) | Found downloaded tempfile [$tempfile]"
-        done
+        tempfile="CompanyPortal-Installer.pkg"
+        echo "$(date) | Found downloaded tempfile [$tempfile]"
         case $tempfile in
             *.pkg|*.PKG|*.mpkg|*.MPKG)
                 packageType="PKG"
