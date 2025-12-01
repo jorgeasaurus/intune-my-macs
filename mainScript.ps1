@@ -43,15 +43,6 @@ $repoRoot = $PSScriptRoot
 if (-not $repoRoot) { $repoRoot = Split-Path -Parent $MyInvocation.MyCommand.Path -ErrorAction Continue}
 if (-not $repoRoot) { Write-Error "Failed to resolve repository root; aborting."; exit 1 }
 
-# ===================== Overview =====================
-# Imports macOS Intune Policies, Shell Scripts, and PKG Apps defined via per-item XML manifests.
-# Features:
-#   --prefix=VALUE          : Name prefix for all created objects
-#   --remove-all            : Delete existing prefixed policies/scripts/apps
-#   --assign-group="Name"   : Assign newly created objects to specified Entra group (required intent for apps)
-#   --tenant-id=GUID        : Specify tenant ID for Microsoft Graph connection
-#   --apps / --config / --scripts : Scope the import to specific object types
-
 
 function Get-DistributedManifests {
     param(
