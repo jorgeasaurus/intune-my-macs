@@ -181,12 +181,10 @@ downloadApp () {
     echo "$(date) | Downloading $appname [$weburl]"
 
     cd "$tempdir"
-    curl -f -s --connect-timeout 30 --retry 5 --retry-delay 60 --compressed -L -J -O "$weburl"
+    tempfile="$appname.pkg"
+    curl -f -s --connect-timeout 30 --retry 5 --retry-delay 60 --compressed -L -o "$tempfile" "$weburl"
     if [[ $? == 0 ]]; then
-        for f in *; do
-            tempfile=$f
-            echo "$(date) | Found downloaded tempfile [$tempfile]"
-        done
+        echo "$(date) | Downloaded to [$tempfile]"
         case $tempfile in
             *.pkg|*.PKG|*.mpkg|*.MPKG)
                 packageType="PKG"
