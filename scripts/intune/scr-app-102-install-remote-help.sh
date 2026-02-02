@@ -51,7 +51,7 @@
 
 # User Defined variables
 mauurl="https://go.microsoft.com/fwlink/?linkid=830196"                         # URL to fetch latest MAU
-weburl="https://aka.ms/downloadremotehelp"                                      # What is the Azure Blob Storage URL?
+weburl="https://aka.ms/downloadremotehelpmacos"                                 # What is the Azure Blob Storage URL?
 appname="Remote Help"                                                           # The name of our App deployment script (also used for Octory monitor)
 app="Remote Help.app"                                                           # The actual name of our App once installed
 logandmetadir="/Library/Logs/Microsoft/IntuneScripts/installRemoteHelp"         # The location of our logs and last updated data
