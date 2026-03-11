@@ -402,7 +402,7 @@ if ($applyChanges) {
 
 # Connect to Microsoft Graph (add apps scope + groups for assignments + scripts for shell scripts)
 $graphParams = @{
-    Scopes = "DeviceManagementConfiguration.ReadWrite.All,DeviceManagementApps.ReadWrite.All,DeviceManagementScripts.ReadWrite.All,Group.Read.All"
+    Scopes = "DeviceManagementConfiguration.ReadWrite.All,DeviceManagementApps.ReadWrite.All,DeviceManagementManagedDevices.ReadWrite.All,DeviceManagementScripts.ReadWrite.All,Group.Read.All"
     NoWelcome = $true
 }
 if ($tenantId) {
