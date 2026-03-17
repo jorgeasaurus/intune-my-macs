@@ -1,15 +1,11 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<manifest>
-    <file>Managed Login Items.json</file>
-    <type>configuration-policy</type>
-    <name>Managed Login Items</name>
-    <description>Configures approved login items and background processes for macOS devices. Allows specific applications (Palo Alto and Microsoft) to run background services by whitelisting their team identifiers, ensuring only trusted applications can automatically start at login.</description>
-    <priority>25</priority>
-    <notes>
-        Approved team identifiers:
-        - PXPZ95SK77 (Palo Alto Networks)
-        - UBF8T346G9 (Microsoft Corporation)
-        
-        This policy helps maintain security by preventing unauthorized applications from running background processes while allowing approved enterprise applications to function properly.
-    </notes>
-</manifest>
+<MacIntuneManifest>
+  <ReferenceId>POL-SYS-101</ReferenceId>
+  <Version>1.0</Version>
+	<Type>Policy</Type>
+	<Name>POL-SYS-101 - Managed Login Items</Name>
+	<Description>Configures approved login items and background processes for macOS devices. Allows specific applications (Palo Alto and Microsoft) to run background services by whitelisting their team identifiers, ensuring only trusted applications can automatically start at login.</Description>
+	<Platform>macOS</Platform>
+	<Category>System Configuration</Category>
+	<SourceFile>configurations/intune/pol-sys-101-login-items.json</SourceFile>
+	<SettingsCount>1</SettingsCount>
+</MacIntuneManifest>

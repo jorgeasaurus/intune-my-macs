@@ -21,6 +21,7 @@ $importPackages             = $true
 $importScripts              = $true
 $importCompliance           = $true  # new: compliance policies
 $importCustomAttrs          = $true  # new: custom attributes
+$importEnrollmentRestrictions = $true  # enrollment platform restrictions
 $includeMde                 = $false # include mde/ folder content only if --mde specified
 $applyChanges               = $false # require --apply to move beyond dry-run mode
 
@@ -31,6 +32,7 @@ $createdComplianceIds = @()
 $createdScriptIds = @()
 $createdAppIds = @()
 $createdCustomAttrIds = @()  # custom attributes
+$createdEnrollmentRestrictionIds = @()  # enrollment restrictions
 
 # set policy prefix (spacing appended automatically later)
 $policyPrefix = "[intune-my-macs]"
@@ -99,6 +101,7 @@ function Get-DistributedManifests {
 
     switch ($type) {
             'Policy' { $obj | Add-Member -NotePropertyName settingCount -NotePropertyValue $settingsCount -Force }
+            'EnrollmentRestriction' { $obj | Add-Member -NotePropertyName settingCount -NotePropertyValue $settingsCount -Force }
             'Script' {
         $scriptNode = $xmlRoot.Element('Script')
                 if ($scriptNode) {
@@ -185,6 +188,15 @@ function Test-DistributedManifest {
                     if (-not (Test-Path -LiteralPath $full)) { Write-Warning ("CustomConfig file missing: {0}" -f $item.filePath) }
                 }
             }
+            'EnrollmentRestriction' {
+                foreach ($req in 'name','filePath') {
+                    if (-not $item.$req) { Write-Host ("EnrollmentRestriction missing {0}: {1}" -f $req, $item.name) -ForegroundColor Red; $errors++ }
+                }
+                if ($item.filePath) {
+                    $full = Join-Path $repoRoot $item.filePath
+                    if (-not (Test-Path -LiteralPath $full)) { Write-Warning ("EnrollmentRestriction file missing: {0}" -f $item.filePath) }
+                }
+            }
         }
     }
     if ($errors -gt 0) { Write-Host "Validation completed with $errors issue(s)." -ForegroundColor Yellow } else { Write-Host "Validation passed with no issues." -ForegroundColor Green }
@@ -258,7 +270,8 @@ if ($argsLower -contains '-h' -or $argsLower -contains '--help') {
     Write-Host "  --config              Import only configuration policies"
     Write-Host "  --compliance          Import only compliance policies"
     Write-Host "  --scripts             Import only shell scripts"
-    Write-Host "  --custom-attributes   Import only custom attributes`n"
+    Write-Host "  --custom-attributes   Import only custom attributes"
+    Write-Host "  --enrollment          Import only enrollment restrictions`n"
     Write-Host "OPTIONAL FEATURES:" -ForegroundColor Yellow
     Write-Host "  --mde                 Include Microsoft Defender for Endpoint (mde/) folder content"
     Write-Host "  --show-all-scripts    Show all scripts during enumeration`n"
@@ -289,7 +302,7 @@ if ($argsLower -contains '-h' -or $argsLower -contains '--help') {
 }
 
 if ($args.Count -gt 0) {
-    $knownFlags = @('--apps','--config','--compliance','--scripts','--custom-attributes','--show-all-scripts','--remove-all','--mde','-mde','--apply','--prefix','--assign-group','--tenant-id','-h','--help')
+    $knownFlags = @('--apps','--config','--compliance','--scripts','--custom-attributes','--enrollment','--show-all-scripts','--remove-all','--mde','-mde','--apply','--prefix','--assign-group','--tenant-id','-h','--help')
     $valueFlags = @('--prefix','--assign-group','--tenant-id')
     $unknownArgs = @(); $missingValueArgs = @()
     $idx = 0
@@ -330,12 +343,13 @@ if ($args.Count -gt 0) {
 }
 
 if ($argsLower.Count -gt 0) {
-    $importPolicies = $false; $importPackages = $false; $importScripts = $false; $importCompliance = $false; $importCustomAttrs = $false
+    $importPolicies = $false; $importPackages = $false; $importScripts = $false; $importCompliance = $false; $importCustomAttrs = $false; $importEnrollmentRestrictions = $false
     if ($argsLower -contains '--apps') { $importPackages = $true }
     if ($argsLower -contains '--config') { $importPolicies = $true }
     if ($argsLower -contains '--compliance') { $importCompliance = $true }
     if ($argsLower -contains '--scripts' ) { $importScripts = $true }
     if ($argsLower -contains '--custom-attributes') { $importCustomAttrs = $true }
+    if ($argsLower -contains '--enrollment') { $importEnrollmentRestrictions = $true }
     $showAllScripts = $false
     if ($argsLower -contains '--show-all-scripts') { $showAllScripts = $true }
     if ($argsLower -contains '--remove-all') { $removeAll = $true }
@@ -381,12 +395,12 @@ if ($argsLower.Count -gt 0) {
             $tenantId = $value.Trim('"')
         }
     }
-    if (-not ($importPolicies -or $importPackages -or $importScripts -or $importCompliance -or $importCustomAttrs)) {
-    Write-Warning "No valid selector provided (--apps, --config, --scripts, --custom-attributes). Defaulting to all."
-        $importPolicies = $true; $importPackages = $true; $importScripts = $true; $importCompliance = $true; $importCustomAttrs = $true
+    if (-not ($importPolicies -or $importPackages -or $importScripts -or $importCompliance -or $importCustomAttrs -or $importEnrollmentRestrictions)) {
+    Write-Warning "No valid selector provided (--apps, --config, --scripts, --custom-attributes, --enrollment). Defaulting to all."
+        $importPolicies = $true; $importPackages = $true; $importScripts = $true; $importCompliance = $true; $importCustomAttrs = $true; $importEnrollmentRestrictions = $true
         $showAllScripts = $true
     } else {
-        Write-Host ("Selection: configPolicies={0} compliance={1} packages={2} scripts={3} customAttributes={4} showAllScripts={5} includeMde={6}" -f $importPolicies, $importCompliance, $importPackages, $importScripts, $importCustomAttrs, $showAllScripts, $includeMde) -ForegroundColor Cyan
+        Write-Host ("Selection: configPolicies={0} compliance={1} packages={2} scripts={3} customAttributes={4} enrollmentRestrictions={5} showAllScripts={6} includeMde={7}" -f $importPolicies, $importCompliance, $importPackages, $importScripts, $importCustomAttrs, $importEnrollmentRestrictions, $showAllScripts, $includeMde) -ForegroundColor Cyan
     }
 }
 
@@ -401,8 +415,29 @@ if ($applyChanges) {
 }
 
 # Connect to Microsoft Graph (add apps scope + groups for assignments + scripts for shell scripts)
+# Ensure Microsoft.Graph.Authentication module is available
+if (-not (Get-Module -ListAvailable -Name Microsoft.Graph.Authentication)) {
+    Write-Host "Microsoft Graph PowerShell SDK not found. Installing..." -ForegroundColor Yellow
+    try {
+        Install-Module Microsoft.Graph.Authentication -Scope CurrentUser -Force -AllowClobber -ErrorAction Stop
+        Write-Host "Microsoft.Graph.Authentication installed successfully." -ForegroundColor Green
+    } catch {
+        Write-Host "`nERROR: Failed to install Microsoft.Graph.Authentication module." -ForegroundColor Red
+        Write-Host "Install it manually with:  Install-Module Microsoft.Graph.Authentication -Scope CurrentUser" -ForegroundColor Yellow
+        Write-Host "For details see: https://learn.microsoft.com/powershell/microsoftgraph/installation`n" -ForegroundColor Cyan
+        exit 1
+    }
+}
+try {
+    Import-Module Microsoft.Graph.Authentication -ErrorAction Stop
+} catch {
+    Write-Host "`nERROR: Failed to load Microsoft.Graph.Authentication module." -ForegroundColor Red
+    Write-Host "Try reinstalling:  Install-Module Microsoft.Graph.Authentication -Scope CurrentUser -Force" -ForegroundColor Yellow
+    exit 1
+}
+
 $graphParams = @{
-    Scopes = "DeviceManagementConfiguration.ReadWrite.All,DeviceManagementApps.ReadWrite.All,DeviceManagementManagedDevices.ReadWrite.All,DeviceManagementScripts.ReadWrite.All,Group.Read.All"
+    Scopes = "DeviceManagementConfiguration.ReadWrite.All,DeviceManagementApps.ReadWrite.All,DeviceManagementManagedDevices.ReadWrite.All,DeviceManagementScripts.ReadWrite.All,DeviceManagementServiceConfig.ReadWrite.All,Group.Read.All"
     NoWelcome = $true
 }
 if ($tenantId) {
@@ -430,14 +465,15 @@ function Remove-IntunePrefixedContent {
         [bool]$ApplyChanges = $false
     )
     if (-not $Prefix) { Write-Error "Prefix is empty; refusing to continue."; return }
-    Write-Host "Scanning Intune for policies, custom configs (mobileconfig), compliance policies, scripts, custom attributes, and apps beginning with prefix: '$Prefix'" -ForegroundColor Cyan
+    Write-Host "Scanning Intune for policies, custom configs (mobileconfig), compliance policies, enrollment restrictions, scripts, custom attributes, and apps beginning with prefix: '$Prefix'" -ForegroundColor Cyan
 
     # Build OData filter string for macOS custom configuration deviceConfiguration lookup
     $escapedFilterDeviceConfigs  = [System.Uri]::EscapeDataString("startsWith(displayName,'$Prefix')")
 
-    $policies = @(); $customConfigs = @(); $compliancePolicies = @(); $scripts = @(); $customAttrs = @(); $apps = @()
+    $policies = @(); $customConfigs = @(); $compliancePolicies = @(); $enrollmentRestrictions = @(); $scripts = @(); $customAttrs = @(); $apps = @()
     
     # Configuration Policies - always use client-side filtering for reliability with special characters
+    Write-Host "  Scanning configuration policies..." -ForegroundColor DarkGray -NoNewline
     try {
         $allPolicies = @()
         $resp = Invoke-MgGraphRequest -Method GET -Uri "https://graph.microsoft.com/beta/deviceManagement/configurationPolicies?`$select=id,name"
@@ -454,10 +490,13 @@ function Remove-IntunePrefixedContent {
             $policies = $allPolicies | Where-Object { $_.name -and $_.name.StartsWith($Prefix) }
             if ($env:IMM_DEBUG -eq '1') { Write-Host "DEBUG: Client-side filter matched $($policies.Count) policies with prefix '$Prefix'" -ForegroundColor DarkCyan }
         }
+        Write-Host " done ($($allPolicies.Count) found)" -ForegroundColor DarkGray
     } catch {
+        Write-Host " failed" -ForegroundColor Red
         Write-Warning "Failed to query configuration policies: $($_.Exception.Message)"
     }
     # Compliance Policies - use client-side filtering with pagination
+    Write-Host "  Scanning compliance policies..." -ForegroundColor DarkGray -NoNewline
     try {
         $allCompliance = @()
         $resp = Invoke-MgGraphRequest -Method GET -Uri "https://graph.microsoft.com/beta/deviceManagement/deviceCompliancePolicies?`$select=id,displayName"
@@ -469,10 +508,13 @@ function Remove-IntunePrefixedContent {
         if ($allCompliance) {
             $compliancePolicies = $allCompliance | Where-Object { $_.displayName -and $_.displayName.StartsWith($Prefix) }
         }
+        Write-Host " done ($($allCompliance.Count) found)" -ForegroundColor DarkGray
     } catch {
+        Write-Host " failed" -ForegroundColor Red
         Write-Warning "Failed to query compliance policies: $($_.Exception.Message)"
     }
     # macOS custom configuration (mobileconfig) live under deviceConfigurations with type macOSCustomConfiguration
+    Write-Host "  Scanning custom configs (mobileconfig)..." -ForegroundColor DarkGray -NoNewline
     try {
         $dcUrl = "https://graph.microsoft.com/beta/deviceManagement/deviceConfigurations?`$filter=$escapedFilterDeviceConfigs"
         $raw = @()
@@ -486,7 +528,9 @@ function Remove-IntunePrefixedContent {
             # Some responses may omit @odata.type if not selected; also detect via payload-related properties
             $customConfigs = $raw | Where-Object { ($_.displayName -and $_.displayName.StartsWith($Prefix)) -and ( $_.'@odata.type' -eq '#microsoft.graph.macOSCustomConfiguration' -or $_.PSObject.Properties.Name -contains 'payload' -or $_.PSObject.Properties.Name -contains 'payloadName') }
         }
+        Write-Host " done" -ForegroundColor DarkGray
     } catch {
+        Write-Host " failed" -ForegroundColor Red
         Write-Warning "Primary query for custom configs failed: $($_.Exception.Message) - attempting broad fallback"
         try {
             $raw = @(); $resp = Invoke-MgGraphRequest -Method GET -Uri "https://graph.microsoft.com/beta/deviceManagement/deviceConfigurations"
@@ -497,6 +541,7 @@ function Remove-IntunePrefixedContent {
     }
     
     # Scripts - use client-side filtering with pagination
+    Write-Host "  Scanning scripts..." -ForegroundColor DarkGray -NoNewline
     try {
         $allScripts = @()
         $resp = Invoke-MgGraphRequest -Method GET -Uri "https://graph.microsoft.com/beta/deviceManagement/deviceShellScripts?`$select=id,displayName"
@@ -506,9 +551,14 @@ function Remove-IntunePrefixedContent {
             $allScripts += $resp.value
         }
         if ($allScripts) { $scripts = $allScripts | Where-Object { $_.displayName -and $_.displayName.StartsWith($Prefix) } }
-    } catch { Write-Warning "Failed to query scripts: $($_.Exception.Message)" }
+        Write-Host " done ($($allScripts.Count) found)" -ForegroundColor DarkGray
+    } catch {
+        Write-Host " failed" -ForegroundColor Red
+        Write-Warning "Failed to query scripts: $($_.Exception.Message)"
+    }
     
     # Custom Attributes - use client-side filtering with pagination
+    Write-Host "  Scanning custom attributes..." -ForegroundColor DarkGray -NoNewline
     try {
         $allCustomAttrs = @()
         $resp = Invoke-MgGraphRequest -Method GET -Uri "https://graph.microsoft.com/beta/deviceManagement/deviceCustomAttributeShellScripts?`$select=id,displayName"
@@ -518,9 +568,31 @@ function Remove-IntunePrefixedContent {
             $allCustomAttrs += $resp.value
         }
         if ($allCustomAttrs) { $customAttrs = $allCustomAttrs | Where-Object { $_.displayName -and $_.displayName.StartsWith($Prefix) } }
-    } catch { Write-Warning "Failed to query custom attributes: $($_.Exception.Message)" }
+        Write-Host " done ($($allCustomAttrs.Count) found)" -ForegroundColor DarkGray
+    } catch {
+        Write-Host " failed" -ForegroundColor Red
+        Write-Warning "Failed to query custom attributes: $($_.Exception.Message)"
+    }
+    
+    # Enrollment Restrictions - use client-side filtering with pagination
+    Write-Host "  Scanning enrollment restrictions..." -ForegroundColor DarkGray -NoNewline
+    try {
+        $allEnrollRestrictions = @()
+        $resp = Invoke-MgGraphRequest -Method GET -Uri "https://graph.microsoft.com/beta/deviceManagement/deviceEnrollmentConfigurations?`$select=id,displayName"
+        $allEnrollRestrictions += $resp.value
+        while ($resp.'@odata.nextLink') {
+            $resp = Invoke-MgGraphRequest -Method GET -Uri $resp.'@odata.nextLink'
+            $allEnrollRestrictions += $resp.value
+        }
+        if ($allEnrollRestrictions) { $enrollmentRestrictions = $allEnrollRestrictions | Where-Object { $_.displayName -and $_.displayName.StartsWith($Prefix) } }
+        Write-Host " done ($($allEnrollRestrictions.Count) found)" -ForegroundColor DarkGray
+    } catch {
+        Write-Host " failed" -ForegroundColor Red
+        Write-Warning "Failed to query enrollment restrictions: $($_.Exception.Message)"
+    }
     
     # Apps - use client-side filtering with pagination
+    Write-Host "  Scanning apps..." -ForegroundColor DarkGray -NoNewline
     try {
         $allApps = @()
         $resp = Invoke-MgGraphRequest -Method GET -Uri "https://graph.microsoft.com/beta/deviceAppManagement/mobileApps?`$select=id,displayName"
@@ -530,15 +602,20 @@ function Remove-IntunePrefixedContent {
             $allApps += $resp.value
         }
         if ($allApps) { $apps = $allApps | Where-Object { $_.displayName -and $_.displayName.StartsWith($Prefix) } }
-    } catch { Write-Warning "Failed to query apps: $($_.Exception.Message)" }
+        Write-Host " done ($($allApps.Count) found)" -ForegroundColor DarkGray
+    } catch {
+        Write-Host " failed" -ForegroundColor Red
+        Write-Warning "Failed to query apps: $($_.Exception.Message)"
+    }
 
     $pCount = ($policies | Measure-Object).Count
     $xCount = ($customConfigs | Measure-Object).Count
     $cCount = ($compliancePolicies | Measure-Object).Count
+    $eCount = ($enrollmentRestrictions | Measure-Object).Count
     $sCount = ($scripts  | Measure-Object).Count
     $caCount = ($customAttrs | Measure-Object).Count
     $aCount = ($apps     | Measure-Object).Count
-    if (($pCount + $xCount + $cCount + $sCount + $caCount + $aCount) -eq 0) {
+    if (($pCount + $xCount + $cCount + $eCount + $sCount + $caCount + $aCount) -eq 0) {
         Write-Host "No Intune objects found with prefix '$Prefix'. Nothing to remove." -ForegroundColor Yellow
         return
     }
@@ -564,12 +641,16 @@ function Remove-IntunePrefixedContent {
         Write-Host "Custom Attributes ($caCount):" -ForegroundColor Magenta
         $customAttrs | ForEach-Object { Write-Host "  • $($_.displayName)  [$($_.id)]" }
     }
+    if ($eCount -gt 0) {
+        Write-Host "Enrollment Restrictions ($eCount):" -ForegroundColor Magenta
+        $enrollmentRestrictions | ForEach-Object { Write-Host "  • $($_.displayName)  [$($_.id)]" }
+    }
     if ($aCount -gt 0) {
         Write-Host "Apps ($aCount):" -ForegroundColor Magenta
         $apps | ForEach-Object { Write-Host "  • $($_.displayName)  [$($_.id)]" }
     }
 
-    Write-Host "Summary: $pCount config policies, $xCount custom configs, $cCount compliance policies, $sCount scripts, $caCount custom attributes, $aCount apps will be permanently removed." -ForegroundColor Cyan
+    Write-Host "Summary: $pCount config policies, $xCount custom configs, $cCount compliance policies, $eCount enrollment restrictions, $sCount scripts, $caCount custom attributes, $aCount apps will be permanently removed." -ForegroundColor Cyan
 
     if (-not $ApplyChanges) {
         Write-Host "[dry-run] Skipping deletion because --apply was not provided." -ForegroundColor Yellow
@@ -617,6 +698,12 @@ function Remove-IntunePrefixedContent {
             Invoke-MgGraphRequest -Method DELETE -Uri "https://graph.microsoft.com/beta/deviceAppManagement/mobileApps/$($a.id)" | Out-Null
             Write-Host "Deleted app: $($a.displayName)" -ForegroundColor Green
         } catch { Write-Warning "Failed to delete app $($a.displayName): $($_.Exception.Message)" }
+    }
+    foreach ($er in $enrollmentRestrictions) {
+        try {
+            Invoke-MgGraphRequest -Method DELETE -Uri "https://graph.microsoft.com/beta/deviceManagement/deviceEnrollmentConfigurations/$($er.id)" | Out-Null
+            Write-Host "Deleted enrollment restriction: $($er.displayName)" -ForegroundColor Green
+        } catch { Write-Warning "Failed to delete enrollment restriction $($er.displayName): $($_.Exception.Message)" }
     }
     Write-Host "Deletion complete." -ForegroundColor Cyan
 }
@@ -1422,6 +1509,45 @@ if ($importCustomAttrs) {
     }
 }
 
+# Enumerate enrollment restrictions
+if ($importEnrollmentRestrictions) {
+    $createdEnrollmentRestrictionIds = @()
+    $enrollmentRestrictions = @()
+    if ($distributedItems) { $enrollmentRestrictions = $distributedItems | Where-Object { $_.type -eq 'EnrollmentRestriction' } }
+    Write-Host "Found $($enrollmentRestrictions.Count) enrollment restriction(s):`n" -ForegroundColor Cyan
+    foreach ($er in $enrollmentRestrictions) {
+        $erPath = Join-Path $repoRoot $er.filePath
+        $exists = Test-Path -LiteralPath $erPath
+        $status = if ($exists) { 'OK' } else { 'MISSING' }
+        $desc = $er.description
+        if ($null -ne $desc -and $desc.Length -gt 140) { $desc = $desc.Substring(0,137)+'...' }
+        Write-Host "• $($er.name)" -ForegroundColor Yellow
+        Write-Host "  - Category: $($er.category); Platform: $($er.platform)"
+        Write-Host "  - Path: $($er.filePath) [$status]"
+        if ($desc) { Write-Host "  - Desc: $desc" }
+        if (-not $exists) { Write-Host "  - Enrollment restriction JSON missing, skipping." -ForegroundColor Red; Write-Host ''; continue }
+        try {
+            $json = Get-Content -LiteralPath $erPath -Raw | ConvertFrom-Json -Depth 15
+            $json.displayName = $policyPrefix + $er.name
+            $body = $json | ConvertTo-Json -Depth 20
+            if (-not $applyChanges) {
+                Write-Host "  - [dry-run] Would create enrollment restriction '$($json.displayName)'." -ForegroundColor DarkGray
+            } else {
+                $resp = Invoke-MgGraphRequest -Method POST -Uri "https://graph.microsoft.com/beta/deviceManagement/deviceEnrollmentConfigurations" -Body $body
+                if ($resp -and $resp.id) {
+                    Write-Host "  - Enrollment restriction imported with ID: $($resp.id)" -ForegroundColor Green
+                    $createdEnrollmentRestrictionIds += $resp.id
+                } else {
+                    Write-Warning "  - Import returned no ID"
+                }
+            }
+        } catch {
+            Write-Error "Failed to import enrollment restriction '$($er.name)': $_"
+        }
+        Write-Host ""
+    }
+}
+
 # Enumerate packages/apps
 if ($importPackages) {
     $createdAppIds = @()
@@ -1652,6 +1778,19 @@ if ($assignGroupName) {
             }
         } else {
             Write-Host "Skipping app assignments (no packages imported)." -ForegroundColor DarkGray
+        }
+
+        # Assign Enrollment Restrictions only if imported this run
+        if ($importEnrollmentRestrictions -and $createdEnrollmentRestrictionIds.Count -gt 0) {
+            foreach ($erId in ($createdEnrollmentRestrictionIds | Sort-Object -Unique)) {
+                try {
+                    $assignBody = @{ enrollmentConfigurationAssignments = @(@{ target = @{ '@odata.type' = '#microsoft.graph.groupAssignmentTarget'; groupId = $groupId } }) } | ConvertTo-Json -Depth 6
+                    Invoke-MgGraphRequest -Method POST -Uri "https://graph.microsoft.com/beta/deviceManagement/deviceEnrollmentConfigurations/$erId/assign" -Body $assignBody | Out-Null
+                    Write-Host "Assigned enrollment restriction $erId to group" -ForegroundColor Green
+                } catch { Write-Warning "Failed to assign enrollment restriction ${erId}: $($_.Exception.Message)" }
+            }
+        } else {
+            Write-Host "Skipping enrollment restriction assignments (none imported)." -ForegroundColor DarkGray
         }
     }
 }

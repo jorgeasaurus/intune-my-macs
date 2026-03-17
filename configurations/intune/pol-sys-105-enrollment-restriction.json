@@ -1,13 +1,10 @@
 {
-  "@odata.type": "#microsoft.graph.deviceEnrollmentPlatformRestriction",
+  "@odata.type": "#microsoft.graph.deviceEnrollmentPlatformRestrictionConfiguration",
   "displayName": "macOS Enrollment Restriction",
   "description": "Controls macOS device enrollment settings and restrictions for managed devices.",
+  "platformType": "mac",
   "platformRestriction": {
     "platformBlocked": false,
-    "personalDeviceEnrollmentBlocked": false,
-    "osMinimumVersion": "15.0",
-    "osMaximumVersion": null,
-    "blockedManufacturers": [],
-    "blockedSkus": []
+    "personalDeviceEnrollmentBlocked": false
   }
 }

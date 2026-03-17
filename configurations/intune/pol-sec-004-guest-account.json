@@ -23,7 +23,7 @@
       "id": "0",
       "settingInstance": {
         "@odata.type": "#microsoft.graph.deviceManagementConfigurationGroupSettingCollectionInstance",
-        "settingDefinitionId": "com.apple.mcx_com.apple.mcx",
+        "settingDefinitionId": "com.apple.mcx_com.apple.mcx-accounts",
         "settingInstanceTemplateReference": null,
         "groupSettingCollectionValue": [
           {
@@ -31,11 +31,11 @@
             "children": [
               {
                 "@odata.type": "#microsoft.graph.deviceManagementConfigurationChoiceSettingInstance",
-                "settingDefinitionId": "com.apple.mcx_DisableGuestAccount",
+                "settingDefinitionId": "com.apple.mcx_disableguestaccount",
                 "settingInstanceTemplateReference": null,
                 "choiceSettingValue": {
                   "settingValueTemplateReference": null,
-                  "value": "com.apple.mcx_DisableGuestAccount_true",
+                  "value": "com.apple.mcx_disableguestaccount_true",
                   "children": []
                 }
               }

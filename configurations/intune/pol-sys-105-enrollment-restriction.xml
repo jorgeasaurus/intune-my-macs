@@ -1,9 +1,11 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<manifest>
-    <file>macos-enrollment-restriction.json</file>
-    <type>enrollment-restriction</type>
-    <name>macOS Enrollment Restriction</name>
-    <description>Controls macOS device enrollment settings and restrictions for managed devices. Sets minimum OS version requirement to macOS 15.0 and allows both corporate and personal device enrollment.</description>
-    <priority>5</priority>
-    <notes>Configures basic enrollment restrictions for macOS devices, ensuring only supported OS versions can enroll while maintaining flexibility for different device ownership types.</notes>
-</manifest>
+<MacIntuneManifest>
+  <ReferenceId>POL-SYS-105</ReferenceId>
+  <Version>1.0</Version>
+	<Type>EnrollmentRestriction</Type>
+	<Name>POL-SYS-105 - macOS Enrollment Restriction</Name>
+	<Description>Controls macOS device enrollment settings and restrictions for managed devices. Allows both corporate and personal device enrollment. Use compliance policies for minimum OS version enforcement.</Description>
+	<Platform>macOS</Platform>
+	<Category>System Configuration</Category>
+	<SourceFile>configurations/intune/pol-sys-105-enrollment-restriction.json</SourceFile>
+	<SettingsCount>1</SettingsCount>
+</MacIntuneManifest>

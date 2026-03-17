@@ -1,10 +1,11 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<manifest>
-    <file>FirewallConfiguration.json</file>
-    <type>configuration-policy</type>
-    <name>Firewall Configuration</name>
-    <description>Enables macOS firewall and prevents users from accessing and modifying firewall settings through System Preferences, ensuring firewall configuration remains under IT control.</description>
-    <priority>20</priority>
-    <supersedes>FirewallUIRestriction.json</supersedes>
-    <notes>This policy combines firewall enablement with UI restrictions to provide comprehensive firewall management. It supersedes the standalone FirewallUIRestriction policy.</notes>
-</manifest>
+<MacIntuneManifest>
+  <ReferenceId>POL-SEC-002</ReferenceId>
+  <Version>1.0</Version>
+	<Type>Policy</Type>
+	<Name>POL-SEC-002 - Firewall</Name>
+	<Description>Enables macOS firewall and prevents users from accessing and modifying firewall settings through System Preferences, ensuring firewall configuration remains under IT control.</Description>
+	<Platform>macOS</Platform>
+	<Category>Security</Category>
+	<SourceFile>configurations/intune/pol-sec-002-firewall.json</SourceFile>
+	<SettingsCount>2</SettingsCount>
+</MacIntuneManifest>
