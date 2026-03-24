@@ -1,0 +1,16 @@
+<MacIntuneManifest>
+  <ReferenceId>SCR-SYS-102</ReferenceId>
+  <Version>1.0</Version>
+  <Type>Script</Type>
+  <Name>SCR-SYS-102 - Set Desktop Wallpaper</Name>
+  <Description>Downloads and sets a corporate desktop wallpaper for the currently logged-in user. Uses osascript to tell Finder to update the desktop picture, which is required on macOS 14+ where file replacement no longer triggers a refresh. Requires the companion PPPC profile (CFG-SYS-100).</Description>
+  <Platform>macOS</Platform>
+  <Category>Config</Category>
+  <SourceFile>scripts/intune/scr-sys-102-set-wallpaper.sh</SourceFile>
+  <Script>
+    <RunAsAccount>system</RunAsAccount>
+    <BlockExecutionNotifications>true</BlockExecutionNotifications>
+    <ExecutionFrequency>PT0S</ExecutionFrequency>
+    <RetryCount>3</RetryCount>
+  </Script>
+</MacIntuneManifest>
